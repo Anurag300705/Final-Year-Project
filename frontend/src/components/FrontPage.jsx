@@ -1,27 +1,38 @@
-
 import { useState } from "react";
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 import {
   Activity,
-  Moon,
-  Smartphone,
+  ArrowRight,
   BookOpen,
   Brain,
-  ArrowRight,
-  Sparkles,
-  HeartPulse,
   Clock,
+  Compass,
+  Globe,
+  GraduationCap,
+  HeartPulse,
   LoaderCircle,
+  Moon,
+  Smartphone,
+  Sparkles,
+  Unlock,
+  User,
+  Users,
 } from "lucide-react";
 
 const initialForm = {
   age: 21,
-  screen_time: 5,
-  sleep_hours: 7,
+  gender: "Female",
+  academic_lvl: "Undergraduate",
+  country: "India",
+  most_used_platform: "Instagram",
+  purpose_of_use: "Entertainment",
+  avg_daily_usage_hours: 5,
+  daily_unlocks: 120,
   study_hours: 4,
-  physical_activity: 30,
-  stress_level: 5,
-  social_platform: "Instagram",
+  physical_activity: 1.5,
+  sleep: 7,
+  stress: "Medium",
 };
 
 export default function FrontPage() {
@@ -32,7 +43,6 @@ export default function FrontPage() {
 
   const updateField = (e) => {
     const { name, value } = e.target;
-
     setForm((prev) => ({
       ...prev,
       [name]: value,
@@ -48,24 +58,34 @@ export default function FrontPage() {
     try {
       const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
+      const payload = {
+        age: Number(form.age),
+        gender: form.gender,
+        academic_lvl: form.academic_lvl,
+        country: form.country,
+        most_used_platform: form.most_used_platform,
+        purpose_of_use: form.purpose_of_use,
+        avg_daily_usage_hours: Number(form.avg_daily_usage_hours),
+        daily_unlocks: Number(form.daily_unlocks),
+        study_hours: Number(form.study_hours),
+        physical_activity: Number(form.physical_activity),
+        sleep: Number(form.sleep),
+        stress: form.stress,
+      };
+
       const response = await fetch(`${apiUrl}/predict`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          ...form,
-          age: Number(form.age),
-          screen_time: Number(form.screen_time),
-          sleep_hours: Number(form.sleep_hours),
-          study_hours: Number(form.study_hours),
-          physical_activity: Number(form.physical_activity),
-          stress_level: Number(form.stress_level),
-        }),
+        body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
-        throw new Error("Unable to predict your score. Please try again.");
+        const errorData = await response.json().catch(() => null);
+        throw new Error(
+          errorData?.detail || "Unable to predict your score. Please try again."
+        );
       }
 
       const data = await response.json();
@@ -73,7 +93,7 @@ export default function FrontPage() {
     } catch (err) {
       setError(
         err.message ||
-          "Could not connect to the server. Please check your backend."
+          "Could not connect to the backend server. Please make sure the FastAPI server is running."
       );
     } finally {
       setLoading(false);
@@ -92,58 +112,7 @@ export default function FrontPage() {
   };
 
   const inputClass =
-    "mt-2 w-full rounded-xl border border-white/10 bg-[#111a2d] px-4 py-3 text-sm text-white outline-none transition focus:border-teal-400 focus:ring-2 focus:ring-teal-400/10";
-
-  const fields = [
-    {
-      name: "age",
-      label: "Your age",
-      icon: Activity,
-      type: "number",
-      min: 13,
-      max: 100,
-      hint: "Years",
-    },
-    {
-      name: "screen_time",
-      label: "Daily screen time",
-      icon: Smartphone,
-      type: "number",
-      min: 0,
-      max: 24,
-      step: 0.5,
-      hint: "Hours per day",
-    },
-    {
-      name: "sleep_hours",
-      label: "Sleep duration",
-      icon: Moon,
-      type: "number",
-      min: 0,
-      max: 24,
-      step: 0.5,
-      hint: "Hours per night",
-    },
-    {
-      name: "study_hours",
-      label: "Study / work time",
-      icon: BookOpen,
-      type: "number",
-      min: 0,
-      max: 24,
-      step: 0.5,
-      hint: "Hours per day",
-    },
-    {
-      name: "physical_activity",
-      label: "Physical activity",
-      icon: HeartPulse,
-      type: "number",
-      min: 0,
-      max: 1440,
-      hint: "Minutes per day",
-    },
-  ];
+    "mt-2 w-full rounded-xl border border-white/10 bg-[#111a2d] px-4 py-3 text-sm text-white outline-none transition focus:border-teal-400 focus:ring-2 focus:ring-teal-400/10 [&>option]:bg-[#111a2d] [&>option]:text-white";
 
   return (
     <main className="min-h-screen overflow-hidden bg-[#080d1a] text-white">
@@ -218,16 +187,16 @@ export default function FrontPage() {
             </h2>
 
             <p className="mt-4 leading-7 text-slate-400">
-              Answer a few questions about your everyday routine. Our trained
-              model will estimate a wellness score based on the information
-              you provide.
+              Answer questions about your everyday digital and lifestyle
+              routine. Our trained model estimates your mental wellness score
+              based on real student habit patterns.
             </p>
 
             <div className="mt-8 space-y-5">
               {[
                 ["01", "Share your daily habits"],
-                ["02", "Get your estimated score"],
-                ["03", "Explore simple suggestions"],
+                ["02", "Predict your wellness score"],
+                ["03", "Explore personalized insights"],
               ].map(([number, title]) => (
                 <div key={number} className="flex items-center gap-4">
                   <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-teal-400/20 bg-teal-400/5 text-sm font-semibold text-teal-300">
@@ -244,10 +213,18 @@ export default function FrontPage() {
                 Your well-being matters
               </p>
               <p className="mt-2 text-xs leading-5 text-slate-400">
-                This is an educational estimate, not a clinical assessment or
-                diagnosis. It cannot determine whether someone has a mental
-                health condition.
+                This is an educational estimate powered by a machine learning model,
+                not a clinical diagnosis. It provides guidance on habit balance.
               </p>
+              <div className="mt-4 border-t border-white/5 pt-3">
+                <Link
+                  to="/about"
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-teal-300 transition hover:text-teal-200"
+                >
+                  Learn about our research & model
+                  <ArrowRight size={13} />
+                </Link>
+              </div>
             </div>
           </motion.div>
 
@@ -264,120 +241,316 @@ export default function FrontPage() {
               </p>
               <h2 className="mt-2 text-2xl font-bold">Let's get to know you</h2>
               <p className="mt-2 text-sm text-slate-400">
-                Fill in your details as accurately as you can.
+                Provide your details below to predict your mental wellness score.
               </p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid gap-5 sm:grid-cols-2">
-                {fields.map((field) => {
-                  const Icon = field.icon;
-
-                  return (
-                    <div key={field.name}>
-                      <label
-                        htmlFor={field.name}
-                        className="flex items-center gap-2 text-sm font-medium text-slate-200"
-                      >
-                        <Icon size={17} className="text-teal-300" />
-                        {field.label}
-                      </label>
-
-                      <input
-                        id={field.name}
-                        name={field.name}
-                        type={field.type}
-                        min={field.min}
-                        max={field.max}
-                        step={field.step || 1}
-                        value={form[field.name]}
-                        onChange={updateField}
-                        required
-                        className={inputClass}
-                      />
-
-                      <p className="mt-1.5 text-xs text-slate-500">
-                        {field.hint}
-                      </p>
-                    </div>
-                  );
-                })}
-
-                {/* Stress level */}
+                {/* 1. Age */}
                 <div>
                   <label
-                    htmlFor="stress_level"
+                    htmlFor="age"
                     className="flex items-center gap-2 text-sm font-medium text-slate-200"
                   >
-                    <Activity size={17} className="text-teal-300" />
-                    Stress level
+                    <User size={17} className="text-teal-300" />
+                    Age
                   </label>
-
-                  <select
-                    id="stress_level"
-                    name="stress_level"
-                    value={form.stress_level}
+                  <input
+                    id="age"
+                    name="age"
+                    type="number"
+                    min={13}
+                    max={100}
+                    value={form.age}
                     onChange={updateField}
-                    className={inputClass}
                     required
-                  >
-                    {Array.from({ length: 10 }, (_, i) => i + 1).map(
-                      (level) => (
-                        <option key={level} value={level}>
-                          {level} / 10
-                          {level === 1
-                            ? " — Very low"
-                            : level === 10
-                              ? " — Very high"
-                              : ""}
-                        </option>
-                      )
-                    )}
-                  </select>
-
-                  <p className="mt-1.5 text-xs text-slate-500">
-                    Your perceived stress, from 1 to 10
-                  </p>
+                    className={inputClass}
+                  />
+                  <p className="mt-1.5 text-xs text-slate-500">Years</p>
                 </div>
 
-                {/* Social platform */}
+                {/* 2. Gender */}
                 <div>
                   <label
-                    htmlFor="social_platform"
+                    htmlFor="gender"
+                    className="flex items-center gap-2 text-sm font-medium text-slate-200"
+                  >
+                    <Users size={17} className="text-teal-300" />
+                    Gender
+                  </label>
+                  <select
+                    id="gender"
+                    name="gender"
+                    value={form.gender}
+                    onChange={updateField}
+                    required
+                    className={inputClass}
+                  >
+                    <option value="Female">Female</option>
+                    <option value="Male">Male</option>
+                    <option value="Other">Other</option>
+                  </select>
+                  <p className="mt-1.5 text-xs text-slate-500">Gender identity</p>
+                </div>
+
+                {/* 3. Academic Level */}
+                <div>
+                  <label
+                    htmlFor="academic_lvl"
+                    className="flex items-center gap-2 text-sm font-medium text-slate-200"
+                  >
+                    <GraduationCap size={17} className="text-teal-300" />
+                    Academic Level
+                  </label>
+                  <select
+                    id="academic_lvl"
+                    name="academic_lvl"
+                    value={form.academic_lvl}
+                    onChange={updateField}
+                    required
+                    className={inputClass}
+                  >
+                    <option value="Undergraduate">Undergraduate</option>
+                    <option value="Graduate">Graduate</option>
+                    <option value="High School">High School</option>
+                  </select>
+                  <p className="mt-1.5 text-xs text-slate-500">Current education level</p>
+                </div>
+
+                {/* 4. Country */}
+                <div>
+                  <label
+                    htmlFor="country"
+                    className="flex items-center gap-2 text-sm font-medium text-slate-200"
+                  >
+                    <Globe size={17} className="text-teal-300" />
+                    Country
+                  </label>
+                  <select
+                    id="country"
+                    name="country"
+                    value={form.country}
+                    onChange={updateField}
+                    required
+                    className={inputClass}
+                  >
+                    <option value="India">India</option>
+                    <option value="USA">USA</option>
+                    <option value="Canada">Canada</option>
+                    <option value="Australia">Australia</option>
+                    <option value="UK">UK</option>
+                    <option value="Germany">Germany</option>
+                    <option value="Mexico">Mexico</option>
+                    <option value="Turkey">Turkey</option>
+                    <option value="France">France</option>
+                    <option value="Other">Other</option>
+                  </select>
+                  <p className="mt-1.5 text-xs text-slate-500">Country of residence</p>
+                </div>
+
+                {/* 5. Most Used Platform */}
+                <div>
+                  <label
+                    htmlFor="most_used_platform"
                     className="flex items-center gap-2 text-sm font-medium text-slate-200"
                   >
                     <Smartphone size={17} className="text-teal-300" />
-                    Most-used social platform
+                    Most Used Platform
                   </label>
-
                   <select
-                    id="social_platform"
-                    name="social_platform"
-                    value={form.social_platform}
+                    id="most_used_platform"
+                    name="most_used_platform"
+                    value={form.most_used_platform}
                     onChange={updateField}
-                    className={inputClass}
                     required
+                    className={inputClass}
                   >
-                    {[
-                      "Instagram",
-                      "YouTube",
-                      "Facebook",
-                      "WhatsApp",
-                      "TikTok",
-                      "X",
-                      "Snapchat",
-                      "Other",
-                      "None",
-                    ].map((platform) => (
-                      <option key={platform} value={platform}>
-                        {platform}
-                      </option>
-                    ))}
+                    <option value="Instagram">Instagram</option>
+                    <option value="YouTube">YouTube</option>
+                    <option value="Facebook">Facebook</option>
+                    <option value="WhatsApp">WhatsApp</option>
+                    <option value="TikTok">TikTok</option>
+                    <option value="Twitter">Twitter / X</option>
+                    <option value="Snapchat">Snapchat</option>
+                    <option value="LinkedIn">LinkedIn</option>
+                    <option value="WeChat">WeChat</option>
+                    <option value="LINE">LINE</option>
+                    <option value="KakaoTalk">KakaoTalk</option>
+                    <option value="VKontakte">VKontakte</option>
+                    <option value="Other">Other</option>
                   </select>
+                  <p className="mt-1.5 text-xs text-slate-500">Platform you use most</p>
+                </div>
 
-                  <p className="mt-1.5 text-xs text-slate-500">
-                    Choose the platform you use most
-                  </p>
+                {/* 6. Purpose of Use */}
+                <div>
+                  <label
+                    htmlFor="purpose_of_use"
+                    className="flex items-center gap-2 text-sm font-medium text-slate-200"
+                  >
+                    <Compass size={17} className="text-teal-300" />
+                    Purpose of Use
+                  </label>
+                  <select
+                    id="purpose_of_use"
+                    name="purpose_of_use"
+                    value={form.purpose_of_use}
+                    onChange={updateField}
+                    required
+                    className={inputClass}
+                  >
+                    <option value="Entertainment">Entertainment</option>
+                    <option value="Education">Education</option>
+                    <option value="Networking">Networking</option>
+                    <option value="News">News</option>
+                  </select>
+                  <p className="mt-1.5 text-xs text-slate-500">Primary motivation for use</p>
+                </div>
+
+                {/* 7. Avg Daily Usage in Hours */}
+                <div>
+                  <label
+                    htmlFor="avg_daily_usage_hours"
+                    className="flex items-center gap-2 text-sm font-medium text-slate-200"
+                  >
+                    <Clock size={17} className="text-teal-300" />
+                    Avg Daily Usage
+                  </label>
+                  <input
+                    id="avg_daily_usage_hours"
+                    name="avg_daily_usage_hours"
+                    type="number"
+                    min={0}
+                    max={24}
+                    step={0.5}
+                    value={form.avg_daily_usage_hours}
+                    onChange={updateField}
+                    required
+                    className={inputClass}
+                  />
+                  <p className="mt-1.5 text-xs text-slate-500">Hours per day on screen</p>
+                </div>
+
+                {/* 8. Daily Unlocks */}
+                <div>
+                  <label
+                    htmlFor="daily_unlocks"
+                    className="flex items-center gap-2 text-sm font-medium text-slate-200"
+                  >
+                    <Unlock size={17} className="text-teal-300" />
+                    Daily Unlocks
+                  </label>
+                  <input
+                    id="daily_unlocks"
+                    name="daily_unlocks"
+                    type="number"
+                    min={0}
+                    max={500}
+                    step={1}
+                    value={form.daily_unlocks}
+                    onChange={updateField}
+                    required
+                    className={inputClass}
+                  />
+                  <p className="mt-1.5 text-xs text-slate-500">Phone unlocks per day</p>
+                </div>
+
+                {/* 9. Study Hours */}
+                <div>
+                  <label
+                    htmlFor="study_hours"
+                    className="flex items-center gap-2 text-sm font-medium text-slate-200"
+                  >
+                    <BookOpen size={17} className="text-teal-300" />
+                    Study Hours
+                  </label>
+                  <input
+                    id="study_hours"
+                    name="study_hours"
+                    type="number"
+                    min={0}
+                    max={24}
+                    step={0.5}
+                    value={form.study_hours}
+                    onChange={updateField}
+                    required
+                    className={inputClass}
+                  />
+                  <p className="mt-1.5 text-xs text-slate-500">Hours per day studying</p>
+                </div>
+
+                {/* 10. Physical Activity */}
+                <div>
+                  <label
+                    htmlFor="physical_activity"
+                    className="flex items-center gap-2 text-sm font-medium text-slate-200"
+                  >
+                    <HeartPulse size={17} className="text-teal-300" />
+                    Physical Activity
+                  </label>
+                  <input
+                    id="physical_activity"
+                    name="physical_activity"
+                    type="number"
+                    min={0}
+                    max={24}
+                    step={0.5}
+                    value={form.physical_activity}
+                    onChange={updateField}
+                    required
+                    className={inputClass}
+                  />
+                  <p className="mt-1.5 text-xs text-slate-500">Hours per day exercising</p>
+                </div>
+
+                {/* 11. Sleep */}
+                <div>
+                  <label
+                    htmlFor="sleep"
+                    className="flex items-center gap-2 text-sm font-medium text-slate-200"
+                  >
+                    <Moon size={17} className="text-teal-300" />
+                    Sleep
+                  </label>
+                  <input
+                    id="sleep"
+                    name="sleep"
+                    type="number"
+                    min={0}
+                    max={24}
+                    step={0.5}
+                    value={form.sleep}
+                    onChange={updateField}
+                    required
+                    className={inputClass}
+                  />
+                  <p className="mt-1.5 text-xs text-slate-500">Hours of sleep per night</p>
+                </div>
+
+                {/* 12. Stress */}
+                <div>
+                  <label
+                    htmlFor="stress"
+                    className="flex items-center gap-2 text-sm font-medium text-slate-200"
+                  >
+                    <Activity size={17} className="text-teal-300" />
+                    Stress Level
+                  </label>
+                  <select
+                    id="stress"
+                    name="stress"
+                    value={form.stress}
+                    onChange={updateField}
+                    required
+                    className={inputClass}
+                  >
+                    <option value="Low">Low</option>
+                    <option value="Medium">Medium</option>
+                    <option value="High">High</option>
+                    <option value="Very High">Very High</option>
+                  </select>
+                  <p className="mt-1.5 text-xs text-slate-500">Perceived stress level</p>
                 </div>
               </div>
 
@@ -390,19 +563,20 @@ export default function FrontPage() {
                 </div>
               )}
 
+              {/* Predict Button */}
               <button
                 type="submit"
                 disabled={loading}
-                className="group flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-teal-400 to-cyan-400 px-6 py-4 font-semibold text-[#07111b] transition duration-300 hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
+                className="group flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-teal-400 to-cyan-400 px-6 py-4 font-semibold text-[#07111b] transition duration-300 hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
               >
                 {loading ? (
                   <>
                     <LoaderCircle size={20} className="animate-spin" />
-                    Analyzing your habits...
+                    Predicting Wellness Score...
                   </>
                 ) : (
                   <>
-                    Calculate My Wellness Score
+                    Predict Wellness Score
                     <ArrowRight
                       size={19}
                       className="transition-transform group-hover:translate-x-1"
@@ -422,10 +596,10 @@ export default function FrontPage() {
                 {validScore ? (
                   <>
                     <p className="text-sm text-slate-400">
-                      Your estimated wellness score
+                      Your estimated mental wellness score
                     </p>
 
-                    <div className="mx-auto my-5 flex h-36 w-36 items-center justify-center rounded-full border-[7px] border-teal-400/20 bg-teal-400/5">
+                    <div className="mx-auto my-5 flex h-36 w-36 items-center justify-center rounded-full border-[7px] border-teal-400/20 bg-teal-400/5 shadow-lg shadow-teal-500/10">
                       <div>
                         <p className="text-4xl font-bold text-teal-300">
                           {score.toFixed(1)}
@@ -434,33 +608,31 @@ export default function FrontPage() {
                       </div>
                     </div>
 
-                    <h3 className="text-xl font-semibold">
-                      {getCategory(score)}
-                    </h3>
+                    <div className="inline-block rounded-full bg-teal-400/10 px-4 py-1 text-sm font-semibold text-teal-300 border border-teal-400/20">
+                      {result.category || getCategory(score)}
+                    </div>
 
-                    <p className="mt-3 text-sm leading-6 text-slate-400">
-                      {score < 3
-                        ? "Consider reviewing your daily routine and seeking support if you are struggling."
-                        : score < 5
-                          ? "Consider making small, sustainable changes to your sleep, activity, and screen-time habits."
-                          : score < 7
-                            ? "Some of your habits may be supporting your well-being. Look for areas where you can improve."
-                            : score < 9
-                              ? "Your reported habits suggest a positive routine. Keep making time for rest and offline activities."
-                              : "Your reported habits correspond to a high estimated score. Continue maintaining a balanced routine."}
+                    <p className="mt-4 text-sm leading-6 text-slate-300">
+                      {result.message ||
+                        (score < 3
+                          ? "Consider reviewing your daily routine and seeking support if you are struggling."
+                          : score < 5
+                            ? "Consider making small, sustainable changes to your sleep, activity, and screen-time habits."
+                            : score < 7
+                              ? "Some of your habits may be supporting your well-being. Look for areas where you can improve."
+                              : score < 9
+                                ? "Your reported habits suggest a positive routine. Keep making time for rest and offline activities."
+                                : "Your reported habits correspond to a high estimated score. Continue maintaining a balanced routine.")}
                     </p>
                   </>
                 ) : (
                   <p role="alert" className="text-sm text-amber-300">
-                    The server returned an unexpected score. Please check your
-                    backend response format.
+                    The server returned an unexpected score. Please check your backend response format.
                   </p>
                 )}
 
                 <p className="mt-5 text-xs leading-5 text-slate-500">
-                  This estimate is not a diagnosis and cannot determine your
-                  mental health status. If you are concerned about your
-                  well-being, consider speaking with a qualified professional.
+                  This estimate is generated by machine learning for informational purposes and is not a clinical diagnosis.
                 </p>
               </motion.div>
             )}
@@ -469,6 +641,19 @@ export default function FrontPage() {
       </section>
 
       <footer className="relative border-t border-white/10 px-5 py-6 text-center text-xs leading-5 text-slate-500">
+        <div className="mb-3 flex items-center justify-center gap-5 text-slate-400">
+          <Link to="/" className="transition hover:text-teal-300">
+            Home
+          </Link>
+          <span>•</span>
+          <a href="/#assessment" className="transition hover:text-teal-300">
+            Assessment
+          </a>
+          <span>•</span>
+          <Link to="/about" className="transition hover:text-teal-300">
+            About the Project
+          </Link>
+        </div>
         © {new Date().getFullYear()} Signal. Built to encourage mindful digital
         habits.
         <br />

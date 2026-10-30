@@ -1,12 +1,22 @@
-
-import { Link, NavLink } from "react-router-dom";
-import { Activity, Brain } from "lucide-react";
+import { Link, NavLink, useLocation } from "react-router-dom";
+import { Brain } from "lucide-react";
 
 export default function Navbar() {
+  const location = useLocation();
+
+  const handleAssessmentClick = (e) => {
+    if (location.pathname === "/") {
+      e.preventDefault();
+      const el = document.getElementById("assessment");
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth" });
+      }
+    }
+  };
+
   return (
     <nav className="sticky top-0 z-50 border-b border-white/10 bg-[#080D1A]/90 backdrop-blur-lg">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4 sm:px-8">
-
         {/* Logo */}
         <Link to="/" className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-teal-400/10 text-teal-300">
@@ -24,9 +34,10 @@ export default function Navbar() {
         </Link>
 
         {/* Navigation links */}
-        <div className="hidden items-center gap-8 md:flex">
+        <div className="flex items-center gap-5 sm:gap-8">
           <NavLink
             to="/"
+            end
             className={({ isActive }) =>
               `text-sm transition ${
                 isActive
@@ -38,30 +49,27 @@ export default function Navbar() {
             Home
           </NavLink>
 
-          <a
-            href="/#assessment"
+          <Link
+            to="/#assessment"
+            onClick={handleAssessmentClick}
             className="text-sm text-slate-300 transition hover:text-teal-300"
           >
             Assessment
-          </a>
+          </Link>
 
-          <a
-            href="/#about"
-            className="text-sm text-slate-300 transition hover:text-teal-300"
+          <NavLink
+            to="/about"
+            className={({ isActive }) =>
+              `text-sm transition ${
+                isActive
+                  ? "font-semibold text-teal-300"
+                  : "text-slate-300 hover:text-teal-300"
+              }`
+            }
           >
             About
-          </a>
+          </NavLink>
         </div>
-
-        {/* CTA */}
-        <a
-          href="/#assessment"
-          className="flex items-center gap-2 rounded-xl bg-teal-400 px-4 py-2.5 text-sm font-semibold text-[#080D1A] transition hover:bg-teal-300"
-        >
-          <Activity size={17} />
-          <span className="hidden sm:inline">Check Wellness</span>
-          <span className="sm:hidden">Start</span>
-        </a>
       </div>
     </nav>
   );
