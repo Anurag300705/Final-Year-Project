@@ -289,7 +289,7 @@ export default function FrontPage() {
                   >
                     <option value="Female">Female</option>
                     <option value="Male">Male</option>
-                    <option value="Other">Other</option>
+                    
                   </select>
                   <p className="mt-1.5 text-xs text-slate-500">Gender identity</p>
                 </div>
@@ -371,7 +371,7 @@ export default function FrontPage() {
                     <option value="Facebook">Facebook</option>
                     <option value="WhatsApp">WhatsApp</option>
                     <option value="TikTok">TikTok</option>
-                    <option value="Twitter">Twitter / X</option>
+                    <option value="Twitter">Twitter</option>
                     <option value="Snapchat">Snapchat</option>
                     <option value="LinkedIn">LinkedIn</option>
                     <option value="WeChat">WeChat</option>
