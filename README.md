@@ -68,7 +68,7 @@ Final-Year-Project/
    ```
 
 - **API Documentation (Swagger)**: [http://localhost:8000/docs](http://localhost:8000/docs)
-- **Health Check**: [http://localhost:8000/health](http://localhost:8000/health)
+- **Health Check (`GET` & `HEAD`)**: [http://localhost:8000/health](http://localhost:8000/health) *(Ideal for uptime monitoring bots & preventing free Render instance spin-down)*
 
 ---
 

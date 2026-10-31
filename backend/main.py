@@ -5,7 +5,7 @@ from typing import Optional, Union
 import joblib
 import numpy as np
 import pandas as pd
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Response
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
@@ -201,8 +201,10 @@ class PredictionResponse(BaseModel):
     details: dict
 
 
-@app.get("/")
-def read_root():
+@app.get("/", summary="Root status check")
+@app.head("/", summary="Root status check (HEAD)", operation_id="read_root_head")
+def read_root(response: Response):
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
     return {
         "status": "online",
         "message": "Student Digital Wellness & Mental Health Score API is running.",
@@ -210,8 +212,10 @@ def read_root():
     }
 
 
-@app.get("/health")
-def health_check():
+@app.get("/health", summary="Health check endpoint")
+@app.head("/health", summary="Health check endpoint (HEAD)", operation_id="health_check_head")
+def health_check(response: Response):
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
     return {
         "status": "healthy" if model is not None else "degraded",
         "model_loaded": model is not None,
@@ -315,3 +319,10 @@ def predict(req: PredictionRequest):
         raise HTTPException(
             status_code=500, detail=f"Prediction failed: {str(e)}"
         )
+
+
+if __name__ == "__main__":
+    import uvicorn
+
+    port = int(os.environ.get("PORT", 8000))
+    uvicorn.run("main:app", host="0.0.0.0", port=port, reload=False)
